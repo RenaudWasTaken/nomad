@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,7 +14,6 @@ import (
 	"github.com/hashicorp/nomad/client/allocrunner/interfaces"
 	agentconsul "github.com/hashicorp/nomad/command/agent/consul"
 	"github.com/hashicorp/nomad/nomad/structs"
-	"github.com/kr/pretty"
 )
 
 var _ interfaces.TaskPrestartHook = &connectHook{}
@@ -89,8 +87,6 @@ RETRY:
 		"-sidecar-for", id, // must use the id not the name!
 	)
 
-	pretty.Print("COMMAND++++++++++>\n", cmd, "\n")
-
 	// Redirect output to local/bootstrap.json
 	fd, err := os.Create(fn)
 	if err != nil {
@@ -107,11 +103,6 @@ RETRY:
 
 	// Close stdout/bootstrap.json
 	fd.Close()
-
-	//TODO(schmichael) Remove
-	contents, _ := ioutil.ReadFile(fn)
-	stderr := buf.String()
-	h.logger.Info("envoy bootstrap.json", "fn", fn, "json", string(contents), "stderr", stderr)
 
 	// Check for error from command
 	if err != nil {
